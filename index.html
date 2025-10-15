@@ -22,7 +22,7 @@
     <h1>TOM-LC CKT — 1 kV Series-Resonant Driver (Online)</h1>
     <p class="muted">
       This page lets you simulate the <b>1 kV Variable-Frequency Series-Resonant Driver</b>
-      directly in your browser. Best tested with
+      directly in your browser using
       <a href="https://shishir-dey.github.io/ngspiceX/" target="_blank" rel="noopener">ngspiceX</a>.
     </p>
   </header>
@@ -84,16 +84,16 @@ Dz      G      0    DCLAMP
 
     <div class="row">
       <button onclick="copyNetlist()">Copy netlist</button>
-      <button class="primary" onclick="openNgspiceX()">Run on ngspiceX</button>
+      <button class="primary" onclick="openNgspiceX()">Open ngspiceX (then upload .cir)</button>
       <a href="./Variable_Frequency_Series_Resonant_Driver_1kV_ngspiceX.cir" download>
-        <button>Download .cir</button>
+        <button>Download .cir (ngspiceX)</button>
       </a>
     </div>
 
     <p class="muted">
-      In ngspiceX: simply click <b>Simulate ▶</b> → choose
-      traces <code>V(N2)</code>, <code>I(Vsense)</code>, <code>V(D_M1)</code>.
-      Frequency and parameter values will appear in the console.
+      In ngspiceX: click <b>Upload (.cir)</b> or drag the file into the editor → press <b>Simulate ▶</b> → select
+      <code>V(N2)</code>, <code>I(Vsense)</code>, <code>V(D_M1)</code>.
+      Frequency and parameter results print in the console.
     </p>
   </section>
 
@@ -103,17 +103,12 @@ Dz      G      0    DCLAMP
       ta.select(); ta.setSelectionRange(0, ta.value.length);
       navigator.clipboard.writeText(ta.value)
         .then(() => alert('Netlist copied to clipboard.'))
-        .catch(() => alert('Copy failed — please copy manually (Ctrl/Cmd+C).'));
+        .catch(() => alert('Copy failed — copy manually (Ctrl/Cmd+C).'));
     }
 
-    // Opens ngspiceX with the hosted netlist pre-loaded
+    // Open plain ngspiceX (manual upload)
     function openNgspiceX() {
-      const netlistURL =
-        'https://raw.githubusercontent.com/ansarirahim/TOM-LC-CKT-online/main/Variable_Frequency_Series_Resonant_Driver_1kV_ngspiceX.cir';
-      window.open(
-        'https://shishir-dey.github.io/ngspiceX/?netlist=' + encodeURIComponent(netlistURL),
-        '_blank'
-      );
+      window.open('https://shishir-dey.github.io/ngspiceX/', '_blank');
     }
   </script>
 </body>
