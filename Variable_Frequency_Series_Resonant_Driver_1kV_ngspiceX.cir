@@ -1,0 +1,62 @@
+* Variable Frequency Series Resonant Driver - 1kV
+* Professional Circuit Design for High Voltage Applications
+* Date: October 14, 2025
+* Description: Variable frequency series-resonant tank driver with MOSFET switching
+* Frequency Range: 300kHz - 380kHz (sweepable)
+* Resonant Frequency: ~339kHz (theoretical)
+
+.param VBUS=1000 RS=1 LVAL=55.11u CVAL=4n RLSER=0.2 RCESR=0.2
+.param Fdrive=340e3 Duty=0.5 VDRV=12 Tr=10n Tf=10n
+.param Tdrive={1/Fdrive}
+.param T0=200u T1=380u
+
+* DC bus + 0V sense for power measurement
+VBUS   NBUS_IN 0 {VBUS}
+Vsense HB      NBUS_IN 0
+
+* Series resonant tank (node-by-node isolation)
+Rs   HB  N1   {RS}
+L1   N1  N2   {LVAL} Rser={RLSER}
+C1   N2  SW   {CVAL} Rser={RCESR}
+
+* MOSFET with drain current sense
+Vids  SW   D_M1   0
+M1    D_M1 G      0  0  IRFP460
+
+* Protection and decoupling
+Rsnub SW 0 100
+Csnub SW 0 1n
+RPROBE N2 0 1Meg
+Cbulk HB 0 2u Rser=0.02 Lser=5n
+
+* Isolated gate driver (no connection to HV bus)
+Vgate   VG_SRC 0 PULSE(0 {VDRV} 0 {Tr} {Tf} {Duty*Tdrive} {Tdrive})
+Rgguard VG_SRC GDRV 1
+Rg      GDRV   G    10
+Dz      G      0    DCLAMP
+
+* Device models
+.model DCLAMP D(Bv=15 Ibv=1m Rs=1 Cjo=50p M=0.3)
+.model IRFP460 VDMOS Vto=4 Rds=0.25 Rd=0.2 Rs=0.05
++ Cgdmax=600p Cgdmin=60p Cgs=2n Cjo=330p M=0.6 Vj=1 Tt=60n
+
+* Measurements
+.meas tran tper  TRIG V(N2) VAL=0 RISE=101  TARG V(N2) VAL=0 RISE=102
+.meas tran f_meas   PARAM {1/tper}
+.meas tran f_theory PARAM {1/(2*pi*sqrt(LVAL*CVAL))}
+.meas tran Vp1 MAX V(N2) FROM {T0} TO {T0+10u}
+.meas tran t1  WHEN V(N2)=Vp1 RISE=1
+.meas tran Vp2 MAX V(N2) FROM {t1+1u} TO {t1+20u}
+.meas tran Qmeas PARAM {pi/log(Vp1/Vp2)}
+.meas tran tau   PARAM {Qmeas/(pi*f_meas)}
+.meas tran Vpk_MAX MAX V(N2) FROM {T0} TO {T1}
+.meas tran Ipk_L1  MAX I(L1) FROM {T0} TO {T1}
+.meas tran Vds_pk  MAX V(D_M1) FROM {T0} TO {T1}
+.meas tran Id_pk   MAX I(Vids) FROM {T0} TO {T1}
+.meas tran Pin AVG ( (V(HB)-V(NBUS_IN)) * I(Vsense) ) FROM {T0} TO {T1}
+
+* --- Simulation control for ngspiceX transient run only ---
+.save all
+.tran 0 300u 50u 5n
+.end
+
