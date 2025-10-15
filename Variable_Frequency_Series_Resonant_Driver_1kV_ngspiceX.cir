@@ -54,9 +54,17 @@ Dz      G      0    DCLAMP
 .meas tran Vds_pk  MAX V(D_M1) FROM {T0} TO {T1}
 .meas tran Id_pk   MAX I(Vids) FROM {T0} TO {T1}
 .meas tran Pin AVG ( (V(HB)-V(NBUS_IN)) * I(Vsense) ) FROM {T0} TO {T1}
+* --- Echo key parameter values to console
+.meas tran echo_VBUS    PARAM VBUS
+.meas tran echo_LVAL    PARAM LVAL
+.meas tran echo_CVAL    PARAM CVAL
+.meas tran echo_RLSER   PARAM RLSER
+.meas tran echo_RCESR   PARAM RCESR
+.meas tran echo_Fdrive  PARAM Fdrive
+.meas tran echo_VDRV    PARAM VDRV
+
 
 * --- Simulation control for ngspiceX transient run only ---
 .save all
 .tran 0 300u 50u 5n
 .end
-
