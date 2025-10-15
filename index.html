@@ -60,11 +60,13 @@ Rbleed2 n2       0        10Meg
 
 .end
 </textarea>
-    <div class="row">
-      <button onclick="copyNetlist()">Copy netlist</button>
-      <button class="primary" onclick="openRunner()">Open ngspice-js</button>
-      <a href="./TOM_LC_websafe_min.cir" download><button>Download .cir</button></a>
-    </div>
+<div class="row">
+  <button onclick="copyNetlist()">Copy netlist</button>
+  <button class="primary" onclick="openRunner()">Open ngspice-js</button>
+  <button onclick="openNgspiceX()">Run on ngspiceX</button>
+  <a href="./TOM_LC_websafe_min.cir" download><button>Download .cir</button></a>
+</div>
+
     <p class="muted">In the runner: paste → <b>Run</b> → add traces <code>V(n2)</code>, <code>V(d_m1)</code>, <code>I(Vsense)</code>.</p>
   </section>
 
