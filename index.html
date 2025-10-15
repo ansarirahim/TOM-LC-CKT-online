@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TOM-LC CKT — Online Simulation</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 24px; line-height: 1.45; }
+    header { margin-bottom: 12px; }
+    h1 { margin: 0 0 8px; }
+    .card { border: 1px solid #ddd; border-radius: 12px; padding: 16px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
+    textarea { width: 100%; height: 360px; font-family: monospace; font-size: 13px; border-radius: 8px; padding: 12px; }
+    button { padding: 10px 14px; border-radius: 10px; border: 1px solid #999; background:#f7f7f7; cursor: pointer; }
+    button.primary { background: #0d6efd; color: white; border-color: #0d6efd; }
+    .row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+    .muted { color: #666; font-size: 14px; }
+    code { background: #f2f2f2; padding: 2px 6px; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>TOM‑LC CKT — 1 kV Series‑Resonant Driver (Online)</h1>
+    <p class="muted">Paste into an ngspice-in-browser runner. Best tested with <a href="https://ngspice.github.io/ngspice-js/" target="_blank" rel="noopener">ngspice‑js</a>.</p>
+  </header>
+
+  <section class="card">
+    <h2>Netlist</h2>
+    <textarea id="netlist">* 1 kV Series-Resonant Driver — Minimal Web ngspice Deck (no .control/.probe)
+.options reltol=5e-3 abstol=1e-6 vabstol=1e-6 iabstol=1e-9 chgtol=1e-15
+.options method=gear maxord=2 itl4=200
+.temp 27
+
+* Fixed values (avoid .param for max compatibility)
+Vbus    nbus     0        1000
+Vsense  hb       nbus     0
+
+Rs      hb       n1       0.01
+Rl1     n1       n1a      0.2
+L1      n1a      n2a      55.11u
+Rc1     n2a      n2       0.2
+C1      n2       d_m1     4n
+
+* Low-side switch to ground, voltage-controlled
+S1      d_m1     0        vg   0   swmod
+.model  swmod sw vt=2 vh=0.1 ron=0.2 roff=1e9
+
+* Gate drive
+Vgate   vg       0        PULSE(0 12 0 10n 10n 500n 1u)
+Rgleak  vg       0        10k
+
+* Bleeds (prevent floating nodes)
+Rbleed1 d_m1     0        1Meg
+Rbleed2 n2       0        10Meg
+
+* Transient analysis
+.tran 0 300u 50u 5n
+
+* Minimal numeric output (for UIs that need printed data)
+.print tran time v(n2) v(d_m1) v(vg) i(vsense)
+
+.end
+</textarea>
+    <div class="row">
+      <button onclick="copyNetlist()">Copy netlist</button>
+      <button class="primary" onclick="openRunner()">Open ngspice-js</button>
+      <a href="./TOM_LC_websafe_min.cir" download><button>Download .cir</button></a>
+    </div>
+    <p class="muted">In the runner: paste → <b>Run</b> → add traces <code>V(n2)</code>, <code>V(d_m1)</code>, <code>I(Vsense)</code>.</p>
+  </section>
+
+  <script>
+    function copyNetlist() {
+      const ta = document.getElementById('netlist');
+      ta.select(); ta.setSelectionRange(0, ta.value.length);
+      navigator.clipboard.writeText(ta.value).then(() => {
+        alert('Netlist copied to clipboard.');
+      }, () => {
+        alert('Copy failed — please select all and copy manually (Ctrl/Cmd+C).');
+      });
+    }
+    function openRunner() {
+      window.open('https://ngspice.github.io/ngspice-js/', '_blank');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+* 1 kV Series-Resonant Driver — Minimal Web ngspice Deck (no .control/.probe)
+.options reltol=5e-3 abstol=1e-6 vabstol=1e-6 iabstol=1e-9 chgtol=1e-15
+.options method=gear maxord=2 itl4=200
+.temp 27
+
+* Fixed values (avoid .param for max compatibility)
+Vbus    nbus     0        1000
+Vsense  hb       nbus     0
+
+Rs      hb       n1       0.01
+Rl1     n1       n1a      0.2
+L1      n1a      n2a      55.11u
+Rc1     n2a      n2       0.2
+C1      n2       d_m1     4n
+
+* Low-side switch to ground, voltage-controlled
+S1      d_m1     0        vg   0   swmod
+.model  swmod sw vt=2 vh=0.1 ron=0.2 roff=1e9
+
+* Gate drive
+Vgate   vg       0        PULSE(0 12 0 10n 10n 500n 1u)
+Rgleak  vg       0        10k
+
+* Bleeds (prevent floating nodes)
+Rbleed1 d_m1     0        1Meg
+Rbleed2 n2       0        10Meg
+
+* Transient analysis
+.tran 0 300u 50u 5n
+
+* Minimal numeric output (for UIs that need printed data)
+.print tran time v(n2) v(d_m1) v(vg) i(vsense)
+
+.end
